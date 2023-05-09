@@ -1,23 +1,21 @@
-function initBarChart() {
-    d3.csv("resources/netMigrationCalendarYear2004-2019.csv").then(function(data) {
+function initTempVsPermBarChart() {
+    d3.csv("resources/tempVSperm.csv").then(function(data) {
       // Convert string values to numbers
       data.forEach(function(d) {
-        d.NOMArrival = +d.NOMArrival;
-        d.NOMDeparture = +d.NOMDeparture;
+        d.Total = +d.Total;
       });
   
       // Filter the data for temporary and permanent visas
       var temporaryVisas = data.filter(function(d) {
         return d.VisaType === "Temporary visas";
       });
-  
       var permanentVisas = data.filter(function(d) {
         return d.VisaType === "Permanent visas";
       });
   
-      // Dimensions
+      // container Dimensions
       var margin = { top: 60, right: 30, bottom: 60, left: 60 };
-      var width = 1000 - margin.left - margin.right;
+      var width = 800 - margin.left - margin.right;
       var height = 400 - margin.top - margin.bottom;
   
       // SVG container for bar chart
@@ -37,24 +35,23 @@ function initBarChart() {
         .domain(temporaryVisas.map(function(d) {
           return d.Year;
         }));
-  
-      // Y scale for number of arrivals
+      
+        //finds max y values of both values, temp and perm returning largest
+        var maxValue = Math.max(
+            d3.max(temporaryVisas, function(d) { return d.Total; }),
+            d3.max(permanentVisas, function(d) { return d.Total; })
+        );
+
+      // Y scale, accounts for max value in range
       var y = d3
         .scaleLinear()
         .range([height, 0])
-        .domain([0, d3.max(temporaryVisas, function(d) {
-          return d.NOMArrival;
-        })]);
-
-        var yPermanent = d3
-        .scaleLinear()
-        .range([height, 0])
-        .domain([0, d3.max(permanentVisas, function(d) {
-            return d.NOMArrival;
-        })]);
-  
-      // Color scale for year
-      var color = d3.scaleOrdinal(d3.schemeCategory10);
+        .domain([0, maxValue]);
+        
+        // Color scale for bar types
+        var color = d3.scaleOrdinal()
+            .domain(["Temporary visas", "Permanent visas"])
+            .range(d3.schemeCategory10);
   
       // Create the bars for temporary visas
       svg.selectAll(".bar-temporary")
@@ -62,11 +59,11 @@ function initBarChart() {
         .enter()
         .append("rect")
         .attr("class", "bar-temporary")
-        .attr("x", function(d) { return x(d.Year); })
-        .attr("y", function(d) { return y(d.NOMArrival); })
-        .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d.NOMArrival); })
-        .style("fill", function(d) { return color(d.Year); });
+        .attr("x", function(d) { return x(d.Year);})
+        .attr("y", function(d) { return y(d.Total); })
+        .attr("width", x.bandwidth() / 2)
+        .attr("height", function(d) { return height - y(d.Total); })
+        .style("fill", color("Temporary visas"));
   
       // Create the bars for permanent visas
       svg.selectAll(".bar-permanent")
@@ -74,11 +71,11 @@ function initBarChart() {
         .enter()
         .append("rect")
         .attr("class", "bar-permanent")
-        .attr("x", function(d) { return x(d.Year); })
-        .attr("y", function(d) { return yPermanent(d.NOMArrival); })
-        .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - yPermanent(d.NOMArrival); })
-        .style("fill", function(d) { return color(d.Year); });
+        .attr("x", function(d) { return x(d.Year) + x.bandwidth() / 2; })
+        .attr("y", function(d) { return y(d.Total); })
+        .attr("width", x.bandwidth() / 2)
+        .attr("height", function(d) { return height - y(d.Total); })
+        .style("fill", color("Permanent visas"));
   
       // Add X-axis to bar chart
       svg.append("g")
@@ -87,33 +84,39 @@ function initBarChart() {
   
       // Add Y-axis to bar chart
       svg.append("g")
-        .call(d3.axisLeft(y));
+        .attr("transform", "translate(0,0)")
+        .call(d3.axisLeft(y).tickValues([...d3.ticks(0, maxValue, 8)]));
             
         // Legend
-        var legend = svg.selectAll(".legend")
-        .data(temporaryVisas)
+      var LegendData = [
+        { label: "Temporary visas", color: color("Temporary visas") },
+        { label: "Permanent visas", color: color("Permanent visas") },
+      ];
+
+      var legend = svg.selectAll(".legend")
+        .data(LegendData)
         .enter()
         .append("g")
         .attr("class", "legend")
         .attr("transform", function(d, i) {
-        return "translate(30," + i * 20 + ")";
+            return "translate(40," + i * 20 + ")";
         });
 
-    legend.append("rect")
+      legend.append("rect")
         .attr("x", width - 18)
         .attr("width", 18)
         .attr("height", 18)
-        .style("fill", function(d) { return color(d.Year); });
+        .style("fill", function(d) { return d.color; });
 
-    legend.append("text")
+      legend.append("text")
         .attr("x", width - 24)
         .attr("y", 9)
         .attr("dy", ".35em")
         .style("text-anchor", "end")
-        .text(function(d) { return d.Year; });
+        .text(function(d) { return d.label; });
 
-    // Title
-    svg.append("text")
+      // Title
+      svg.append("text")
         .attr("x", (width / 2))
         .attr("y", 0 - (margin.top / 2))
         .attr("text-anchor", "middle")
@@ -122,4 +125,4 @@ function initBarChart() {
     });
 }
 
-window.onload = initBarChart;
+window.onload = initTempVsPermBarChart;
