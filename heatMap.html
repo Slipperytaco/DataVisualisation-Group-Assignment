@@ -7,9 +7,8 @@
         <meta name="Author" content="Ari Fadida, Danny Hoang"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Migration Report - Data Visualisation group proj</title>
-        <link rel="stylesheet" href="styling/tempVSperm.css">
-
         <script src="https://d3js.org/d3.v5.min.js"></script>
+        <link rel="stylesheet" href="styling/heatMap.css">
     </head>
     <body>
         <nav>
@@ -21,22 +20,17 @@
                 <li><a href="#">Content</a></li>
             </ul>
         </nav>
-        <h1>Temporary Vs Permananet Visa 2004-2019</h1>
-        <!--<div id="yearSelector"></div>  will show details regarding immigration policy from different csv see interactive01.js for code-->
-        <div id="showTempTrend"></div> <!-- will show line graph on top of the bar chart highlighting the trend -->
-        <div id="showPermTrend"></div>
-        <div id="chart"></div>  <!-- main chart element for temp vs perm page-->
-        <h2></h2>
-        
+        <h1>Chloropleth Graph</h1>
+        <div id="heatMap"></div>
+        <div id="slider"></div>
+
     </body>
     <footer>
+        <p>the geoJSON data used has been provided by: <a href="https://cartographyvectors.com/map/782-australia-with-states">link</a></p>
         <p>COS30045 Data Visualisation, Group Project</p>
         <p>Ari Fadida, Danny Hoang </p>
     </footer>
     
-    <script src="script/tempVSpermVisa.js"></script>
-       
-    <!-- <script src="script/test.js"></script> 
-    <script src="script/interactive01.js"></script> -->
-        
+    <script src="script/heatMap.js"></script>
+   
 </html>
