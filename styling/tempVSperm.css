@@ -3,7 +3,7 @@ body {
   margin: 0;
   padding: 0;
 }
-
+/* nav menu css */
 .nav-menu {
   display: flex;
   justify-content: space-around;
@@ -49,13 +49,13 @@ body {
   fill-opacity: 0.6;
 }
 
-/* New CSS for trend line */
+/* CSS for trend line -- makes it dotted */
 .line-temporary,
 .line-permanent {
   stroke-dasharray: 5, 5;
 }
 
-/* New CSS for the secondary Y axis */
+/* CSS for trendline for the secondary Y axis */
 .axis-right .domain {
   stroke: none;
 }
@@ -70,6 +70,7 @@ body {
 
 .legend {
   font-size: 14px;
+  font-weight: bold;
 }
 
 .title {

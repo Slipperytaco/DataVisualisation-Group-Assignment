@@ -99,8 +99,9 @@ function initTempVsPermBarChart() {
       //Adds y-axis to bar chart
       svg.append("g")
         .attr("transform", "translate(0,0)")
-        .call(d3.axisLeft(y).tickValues([...d3.ticks(0, maxValue, 8)]));
-            
+        .call(d3.axisLeft(y)
+          .tickValues([...d3.ticks(0, maxValue, 8)]));
+         
         //legend
       var LegendData = [
         { label: "Temporary visas", color: color("Temporary visas") },
@@ -113,15 +114,15 @@ function initTempVsPermBarChart() {
         .append("g")
         .attr("class", "legend")
         .attr("transform", function(d, i) {
-            return "translate(40," + i * 20 + ")";
+            return "translate(20," + i * 20 + ")";
         });
-
+      //legend rectangles 
       legend.append("rect")
         .attr("x", width - 18)
         .attr("width", 18)
         .attr("height", 18)
         .style("fill", function(d) { return d.color; });
-
+      //legend labels 
       legend.append("text")
         .attr("x", width - 24)
         .attr("y", 9)
@@ -129,7 +130,7 @@ function initTempVsPermBarChart() {
         .style("text-anchor", "end")
         .text(function(d) { return d.label; });
 
-      //title
+      //chart title
       svg.append("text")
         .attr("x", (width / 2))
         .attr("y", 0 - (margin.top / 2))
@@ -152,14 +153,14 @@ function initTempVsPermBarChart() {
         .append("button")
         .text("Toggle Temporary Visa Trend Line")
         .on("click", function() {
-            showTempTrendLine = !showTempTrendLine;
+            showTempTrendLine = !showTempTrendLine; //toggle function 
             svg.selectAll(".line-temporary").remove();
             svg.selectAll(".axis-right").remove();
             if (showTempTrendLine) {
                 svg.append("path")
                     .datum(tempMovingAvgs)
                     .attr("fill", "none")
-                    .attr("stroke", color("Temporary visas"))
+                    .attr("stroke", color("Temporary visas")) //uses same color scale as bars 
                     .attr("stroke-width", 2)
                     .attr("class", "line-temporary")
                     .attr("d", line);
