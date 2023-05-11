@@ -12,6 +12,7 @@ function initTempVsPermBarChart() {
     var permanentVisas = data.filter(function(d) {
       return d.VisaType === "Permanent visas";
     });
+    
 
     // container Dimensions
     var margin = { top: 60, right: 30, bottom: 60, left: 60 };
@@ -49,10 +50,40 @@ function initTempVsPermBarChart() {
       .domain([0, maxValue]);
       
       // Color scale for bar types
-      var color = d3.scaleOrdinal()
-          .domain(["Temporary visas", "Permanent visas"])
-          .range(d3.schemeCategory10);
+    var color = d3.scaleOrdinal()
+        .domain(["Temporary visas", "Permanent visas"])
+        .range(d3.schemeCategory10);
+    
+    //add title to the svg container 
+    var title = svg.append("text")
+      .attr("x", (width / 2))
+      .attr("y", 0 - (margin.top / 2))
+      .attr("text-anchor", "middle")
+      .style("font-size", "18px")
+      .text("Total Temporary Visa vs Permanent Visa Trends from 2004-2019 in Australia");
+    
+    function updateTitle(year){
+      title.text("Visa Details for " + year);
+    } 
+    
+    function interactiveDetailChart(year) {
+      d3.csv("resources/netMigrationCalendarYear2004-2019.csv").then(function(detailedData){
+        //filter data for a given year, remove "Total" Visatype rows
+        var filteredData = detailedData.filter(function(d){
+            d.Year == year && d.VisaType !== "Total";
+        });
+        //process new data 
+        filteredData.forEach(function(d) {
+            d.NOMArrival = +d.NOMArrival;
+            d.NOMDeparture = +d.NOMDeparture;
+            d.NOM = +d.NOM;
+        });
+        
+        //clear the current chart of all of its content
+        svg.selectAll(".bar-temporary, .bar-permanent, .legend").remove();
 
+      });
+    }
     // Create the bars for temporary visas
     svg.selectAll(".bar-temporary")
       .data(temporaryVisas)
@@ -63,7 +94,10 @@ function initTempVsPermBarChart() {
       .attr("y", function(d) { return y(d.Total); })
       .attr("width", x.bandwidth() / 2)
       .attr("height", function(d) { return height - y(d.Total); })
-      .style("fill", color("Temporary visas"));
+      .style("fill", color("Temporary visas"))
+      .on("click", function(d) { interactiveDetailChart(d.Year); }); 
+      //if user clicks on a bar, calls function which displays details regarding that year 
+
 
 
     // Create the bars for permanent visas
@@ -77,19 +111,29 @@ function initTempVsPermBarChart() {
       .attr("width", x.bandwidth() / 2)
       .attr("height", function(d) { return height - y(d.Total); })
       .style("fill", color("Permanent visas"))
-      .on("mouseover", function(event, d) {
+      .on("click", function(d) {interactiveDetailChart(d.Year);});
+
+      //code below was an attempt at getting data values returned to the graph
+      /*
+            .on("mouseover", function(event, d) {
+
         var xPos = parseFloat(d3.select(this).attr("x"))
         var yPos = parseFloat(d3.select(this).attr("y"))
         var width = parseFloat(d3.select(this).attr("width"))
+
         d3.select(this)
           .transition()
           .duration(125)
-          //.style("fill", "green")
+          .style("fill", "green")
+
         svg.append("text")
           .attr("id", "tooltip")
           .attr("x", xPos+width/2)
           .attr("y", yPos-5)
-          .text(d.Total) //not currently displaying anything, need to work on this. 
+          .style("font-size", "12px")
+          .style("fill", "black")
+          .text(d.Total);
+
       })
       .on("mouseout", function(event, d) {
         d3.select(this)
@@ -97,6 +141,7 @@ function initTempVsPermBarChart() {
           .duration(125)
           .style("fill", color("Permanent visas"))
       });
+      */
 
     // Add X-axis to bar chart
     svg.append("g")

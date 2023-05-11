@@ -1,61 +1,80 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .nav-menu {
-    display: flex;
-    justify-content: space-around;
-    list-style-type: none;
-    padding: 0;
-    background-color: #333;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-menu {
+  display: flex;
+  justify-content: space-around;
+  list-style-type: none;
+  padding: 0;
+  background-color: #333;
 }
 
 .nav-menu li {
-    display: inline;
+  display: inline;
 }
 
 .nav-menu a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
 }
 
 .nav-menu a:hover {
-    background-color: #111;
+  background-color: #111;
 }
-  .container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  #chart {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .bar-temporary {
-    fill-opacity: 0.9;
-  }
-  
-  .bar-permanent {
-    fill-opacity: 0.6;
-  }
-  
-  .legend {
-    font-size: 14px;
-  }
-  
-  .title {
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+#chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bar-temporary {
+  fill-opacity: 0.9;
+}
+
+.bar-permanent {
+  fill-opacity: 0.6;
+}
+
+/* New CSS for trend line */
+.line-temporary,
+.line-permanent {
+  stroke-dasharray: 5, 5;
+}
+
+/* New CSS for the secondary Y axis */
+.axis-right .domain {
+  stroke: none;
+}
+
+.axis-right .tick line {
+  stroke: lightgray;
+}
+
+.axis-right .tick text {
+  fill: gray;
+}
+
+.legend {
+  font-size: 14px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}

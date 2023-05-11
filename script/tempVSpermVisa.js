@@ -1,3 +1,17 @@
+function movingAverage(data, windowSize) {
+  return data.map((row, idx, total) => {
+      const start = Math.max(0, idx - windowSize);
+      const end = idx;
+      const window = total.slice(start, end + 1);
+      const avg = window.reduce((sum, row) => sum + row.Total, 0) / window.length;
+      return { Year: row.Year, Average: avg };
+  });
+}
+//set vars for trendline 
+var showTempTrendLine = false;
+var showPermTrendLine = false;
+
+
 function initTempVsPermBarChart() {
     d3.csv("resources/tempVSperm.csv").then(function(data) {
       // Convert string values to numbers
@@ -65,7 +79,7 @@ function initTempVsPermBarChart() {
         .attr("height", function(d) { return height - y(d.Total); })
         .style("fill", color("Temporary visas"));
   
-      // Create the bars for permanent visas
+      //Create the bars for perm visa
       svg.selectAll(".bar-permanent")
         .data(permanentVisas)
         .enter()
@@ -77,17 +91,17 @@ function initTempVsPermBarChart() {
         .attr("height", function(d) { return height - y(d.Total); })
         .style("fill", color("Permanent visas"));
   
-      // Add X-axis to bar chart
+      //add x-axis to bar chart
       svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
   
-      // Add Y-axis to bar chart
+      //Adds y-axis to bar chart
       svg.append("g")
         .attr("transform", "translate(0,0)")
         .call(d3.axisLeft(y).tickValues([...d3.ticks(0, maxValue, 8)]));
             
-        // Legend
+        //legend
       var LegendData = [
         { label: "Temporary visas", color: color("Temporary visas") },
         { label: "Permanent visas", color: color("Permanent visas") },
@@ -115,13 +129,72 @@ function initTempVsPermBarChart() {
         .style("text-anchor", "end")
         .text(function(d) { return d.label; });
 
-      // Title
+      //title
       svg.append("text")
         .attr("x", (width / 2))
         .attr("y", 0 - (margin.top / 2))
         .attr("text-anchor", "middle")
         .style("font-size", "18px")
         .text("Total Temporary Visa vs Permanent Visa Trends from 2004-2019 in Australia");
+      
+      //TREND LINE / Moving avg implementation: 
+      //y scale:
+      var y2 = d3.scaleLinear().range([height, 0]).domain([0, maxValue]);
+
+      //create line for trend lines:
+      var line = d3.line().x(function(d) { return x(d.Year); }).y(function(d) { return y2(d.Average) });
+
+      //calc moving avg
+      var tempMovingAvgs = movingAverage(temporaryVisas, 2); //2 - window size, adjust if need
+      var permMovingAvgs = movingAverage(permanentVisas, 2);
+
+      d3.select("#showTempTrend")
+        .append("button")
+        .text("Toggle Temporary Visa Trend Line")
+        .on("click", function() {
+            showTempTrendLine = !showTempTrendLine;
+            svg.selectAll(".line-temporary").remove();
+            svg.selectAll(".axis-right").remove();
+            if (showTempTrendLine) {
+                svg.append("path")
+                    .datum(tempMovingAvgs)
+                    .attr("fill", "none")
+                    .attr("stroke", color("Temporary visas"))
+                    .attr("stroke-width", 2)
+                    .attr("class", "line-temporary")
+                    .attr("d", line);
+            }
+            if (showTempTrendLine || showPermTrendLine) {
+                svg.append("g")
+                    .attr("transform", "translate(" + width + ",0)")
+                    .attr("class", "axis-right")
+                    .call(d3.axisRight(y2));
+            }
+      });
+      d3.select("#showPermTrend")
+        .append("button")
+        .text("Toggle Permanent Visa Trend Line")
+        .on("click", function() {
+            showPermTrendLine = !showPermTrendLine;
+            svg.selectAll(".line-permanent").remove();
+            svg.selectAll(".axis-right").remove();
+            if (showPermTrendLine) {
+                svg.append("path")
+                    .datum(permMovingAvgs)
+                    .attr("fill", "none")
+                    .attr("stroke", color("Permanent visas"))
+                    .attr("stroke-width", 2)
+                    .attr("class", "line-permanent")
+                    .attr("d", line);
+            }
+            if (showTempTrendLine || showPermTrendLine) {
+                svg.append("g")
+                    .attr("transform", "translate(" + width + ",0)")
+                    .attr("class", "axis-right")
+                    .call(d3.axisRight(y2));
+            };
+          });  
+        
     });
 }
 
