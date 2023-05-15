@@ -1,7 +1,7 @@
 var years = d3.range(2004, 2021);
 var colorScale;
 var geojson;
-
+var color;
 function init(){
 
     var w = 600;
@@ -49,6 +49,28 @@ function init(){
                     .domain([0, maxVal])
                     .range(d3.schemeBlues[9]); 
             
+               // Create a separate SVG for the legend
+            var legendSvg = d3.select("#legend").append("svg")
+                .attr("width", 800)
+                .attr("height", 50);
+
+                // Draw one rectangle for each color in the scale
+            var legend = legendSvg.selectAll(".legend")
+                .data(color.range())
+                .enter().append("g")
+                .attr("class", "legend");
+
+            legend.append("rect")
+                .attr("x", function(d, i) { return 30 * i; })
+                .attr("width", 30)
+                .attr("height", 20)
+                .style("fill", function(d) { return d; });
+
+                // Add text labels for the color values
+            legend.append("text")
+                .attr("x", function(d, i) { return 30 * i; })
+                .attr("y", 30)
+                .text(function(d, i) { return '≥ ' + color.invertExtent(d)[0]; });
     }); 
     
     var sliderDiv = d3.select("#slider");
@@ -60,6 +82,13 @@ function init(){
         .on("input", function() {
             update(+this.value); //calls update function when slider changes 
     });
+    svg.append("text")
+        .attr("x", w / 2)             
+        .attr("y", 20)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "20px")   
+        .text("Net Overseas Arrivals - Year " + slider.value);
+ 
     
 
     function update(year){
