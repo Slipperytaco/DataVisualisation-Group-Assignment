@@ -1,0 +1,18 @@
+Year,VisaType,MajorGrouping,NOMArrival,NOMDeparture,NOM
+2004,Temporary visas,,155000,64040,90960
+,,VET,8570,3210,5360
+,,Higher education sector,29860,7850,22010
+,,Student other,40200,9970,30230
+,,Temporary work skilled,16660,7130,9530
+,,Visitor,38870,19430,19440
+,,Working Holiday,12150,3230,8920
+,,Other temporary visas,8680,13220,-4530
+,Permanent visas,,79140,17820,61330
+,,Family,28930,4350,24580
+,,Skill,34680,7180,27500
+,,S/E & humanitarian,11690,250,11440
+,,Other permanent visas,3850,6030,-2180
+,NZ Citizen,,35960,17920,18030
+,AUS Citizen,,68130,98550,-30420
+,Other,,12790,13890,-1090
+,Total,,351010,212220,138800

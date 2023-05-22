@@ -12,9 +12,6 @@ Year,VisaType,MajorGrouping,NOMArrival,NOMDeparture,NOM
 ,,Skill,34680,7180,27500
 ,,S/E & humanitarian,11690,250,11440
 ,,Other permanent visas,3850,6030,-2180
-,NZ Citizen,,35960,17920,18030
-,AUS Citizen,,68130,98550,-30420
-,Other,,12790,13890,-1090
 ,Total,,351010,212220,138800
 2005,Temporary visas,,149970,64410,85570
 ,,VET,8570,3340,5240
@@ -29,9 +26,6 @@ Year,VisaType,MajorGrouping,NOMArrival,NOMDeparture,NOM
 ,,Skill,39390,6540,32850
 ,,S/E & humanitarian,12840,230,12610
 ,,Other permanent visas,3750,4900,-1140
-,NZ Citizen,,38290,16420,21870
-,AUS Citizen,,72960,90660,-17700
-,Other,,14980,17730,-2750
 ,Total,,362180,205000,157180
 2006,Temporary visas,,179670,64330,115340
 ,,VET,13700,3330,10370
@@ -46,9 +40,6 @@ Year,VisaType,MajorGrouping,NOMArrival,NOMDeparture,NOM
 ,,Skill,45080,6800,38280
 ,,S/E & humanitarian,12500,120,12380
 ,,Other permanent visas,3620,4640,-1010
-,NZ Citizen,,40670,15530,25140
-,AUS Citizen,,76010,91800,-15790
-,Other,,13270,17040,-3770
 ,Total,,402140,204650,197490
 2007,Temporary visas,,230490,66580,163920
 ,,VET,25480,3690,21790
@@ -63,9 +54,6 @@ Year,VisaType,MajorGrouping,NOMArrival,NOMDeparture,NOM
 ,,Skill,47800,7510,40290
 ,,S/E & humanitarian,10710,80,10630
 ,,Other permanent visas,3700,4700,-1000
-,NZ Citizen,,47480,15460,32020
-,AUS Citizen,,72340,97300,-24960
-,Other,,15490,20240,-4750
 ,Total,,460580,216550,244030
 2008,Temporary visas,,287690,83880,203810
 ,,VET,40200,4610,35590
@@ -80,9 +68,6 @@ Year,VisaType,MajorGrouping,NOMArrival,NOMDeparture,NOM
 ,,Skill,53700,7210,46490
 ,,S/E & humanitarian,9980,100,9880
 ,,Other permanent visas,4130,4650,-510
-,NZ Citizen,,53940,15910,38030
-,AUS Citizen,,79160,89500,-10330
-,Other,,12520,14250,-1720
 ,Total,,535970,220280,315690
 2009,Temporary visas,,247930,99740,148190
 ,,VET,48750,7490,41260
@@ -97,10 +82,12 @@ Year,VisaType,MajorGrouping,NOMArrival,NOMDeparture,NOM
 ,,Skill,43230,8440,34790
 ,,S/E & humanitarian,12060,100,11950
 ,,Other permanent visas,3940,4740,-800
-,NZ Citizen,,38130,17760,20370
-,AUS Citizen,,80520,80720,-200
-,Other,,17010,15290,1720
 ,Total,,478790,231890,246900
+
+
+
+
+
 2010,Temporary visas,,200210,113850,86370
 ,,VET,13890,12200,1690
 ,,Higher education sector,47760,28500,19260

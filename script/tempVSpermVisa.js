@@ -91,12 +91,85 @@ function initTempVsPermBarChart() {
         .attr("height", function(d) { return height - y(d.Total); })
         .style("fill", color("Permanent visas"));
   
-      //add x-axis to bar chart
+      //x-axis to chart
       svg.append("g")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .on("click", function(d) {
+          displayYearDetails(d);
+      });
+
+      function displayYearDetails(year) {
+        d3.csv("resources/yearDetails.csv").then(function(data) {
+          //covert string to numbers
+          data.forEach(function(d) {
+            d.NOMArrival = +d.NOMArrival;
+            d.NOMDeparture = +d.NOMDeparture;
+            d.NOM = +d.NOM;
+          });
+
+          //filer the data for the selected year:
+          var yearData = data.filter(function(d) {
+            return d.Year == year;
+          });
+          
+          //setup the svg for the new chart: 
+          var margin = { top: 60, right: 30, bottom: 60, left: 60 };
+          var width = 800 - margin.left - margin.right;
+          var height = 400 - margin.top - margin.bottom;
+
+          var svg = d3 
+            .select("#yearDetails")
+            .append("svg")
+            .attr("width", width + margin.left + "," + margin.top + ")");
+
+            var x0 = d3.scaleBand()
+              .rangeRound([0, width])
+              .paddingInner(0.1);
+            var x1 = d3.scaleBand()
+              .padding(0.05);
+            var y = d3.scaleLinear()
+              .rangeRound([height, 0]);
+            
+              //define bar groups and colours 
+            var keys = ["NOMArrival", "NOMDeparture", "NOM"];
+            var colors = ["#6baed6", "#fd8d3c", "#74c476"];        
+
+            x0.domain(yearData.map(function(d) { return d.VisaType; }));
+            x1.domain(keys).rangeRound([0, x0.bandwidth()]);
+            y.domain([0, d3.max(yearData, function(d) { return d3.max(keys, function(key) { return d[key]; }); })]).nice();
+    
+            svg.append("g")
+                .selectAll("g")
+                .data(yearData)
+                .enter().append("g")
+                .attr("transform", function(d) { return "translate(" + x0(d.VisaType) + ",0)"; })
+                .selectAll("rect")
+                .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
+                .enter().append("rect")
+                .attr("x", function(d) { return x1(d.key); })
+                .attr("y", function(d) { return y(d.value); })
+                .attr("width", x1.bandwidth())
+                .attr("height", function(d) { return height - y(d.value); })
+                .attr("fill", function(d) { return colors[keys.indexOf(d.key)]; });
+    
+            // Add the x-axis
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+    
+            // Add the y-axis
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+            
+          });
+        
+      }  
   
-      //Adds y-axis to bar chart
+      //add y axis (1)
       svg.append("g")
         .attr("transform", "translate(0,0)")
         .call(d3.axisLeft(y)

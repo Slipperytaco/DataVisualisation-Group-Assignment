@@ -47,7 +47,8 @@ function init(){
             var maxVal = d3.max(data, function(d) { return d3.max(years, function(y) { return d[y]; }); });
             color = d3.scaleQuantize()
                     .domain([0, maxVal])
-                    .range(d3.schemeBlues[9]); 
+                    .range(d3.schemeReds[9]); 
+                    
             
                // Create a separate SVG for the legend
             var legendSvg = d3.select("#legend").append("svg")
