@@ -28,8 +28,8 @@ function initTempVsPermBarChart() {
       });
   
       // container Dimensions
-      var margin = { top: 60, right: 30, bottom: 60, left: 60 };
-      var width = 800 - margin.left - margin.right;
+      var margin = { top: 60, right: 100, bottom: 60, left: 60 };
+      var width = 1000 - margin.left - margin.right;
       var height = 400 - margin.top - margin.bottom;
   
       // SVG container for bar chart
@@ -101,28 +101,38 @@ function initTempVsPermBarChart() {
       });
 
       function displayYearDetails(year) {
-        d3.csv("resources/yearDetails.csv").then(function(data) {
+        d3.csv(`resources/yearDetails/${year}Details.csv`).then(function(data) {
+
+          d3.select("#yearDetails").html("");
+
           //covert string to numbers
           data.forEach(function(d) {
             d.NOMArrival = +d.NOMArrival;
             d.NOMDeparture = +d.NOMDeparture;
             d.NOM = +d.NOM;
           });
+          console.log(data);
 
-          //filer the data for the selected year:
-          var yearData = data.filter(function(d) {
-            return d.Year == year;
-          });
+          var colors = ["#6baed6", "#fd8d3c", "#74c476"];
+          var color = d3.scaleOrdinal()
+            .domain(["NOMArrival", "NOMDeparture", "NOM"])
+            .range(colors);
+
+          var yearData = data;  
           
           //setup the svg for the new chart: 
-          var margin = { top: 60, right: 30, bottom: 60, left: 60 };
-          var width = 800 - margin.left - margin.right;
-          var height = 400 - margin.top - margin.bottom;
+          var margin = { top: 60, right: 100, bottom: 60, left: 60 };
+          var width = 1000 - margin.left - margin.right;
+          var height = 400 - margin.top - margin.bottom - margin.bottom;
 
-          var svg = d3 
-            .select("#yearDetails")
-            .append("svg")
-            .attr("width", width + margin.left + "," + margin.top + ")");
+          var svg = d3
+          .select("#yearDetails")
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom + margin.bottom) 
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
 
             var x0 = d3.scaleBand()
               .rangeRound([0, width])
@@ -132,41 +142,100 @@ function initTempVsPermBarChart() {
             var y = d3.scaleLinear()
               .rangeRound([height, 0]);
             
-              //define bar groups and colours 
+            //define bar groups and colours 
             var keys = ["NOMArrival", "NOMDeparture", "NOM"];
-            var colors = ["#6baed6", "#fd8d3c", "#74c476"];        
 
-            x0.domain(yearData.map(function(d) { return d.VisaType; }));
+            function abbreviateVisaType(type) {
+              if(type.includes("Temporary")) {
+                return "Temp";
+              } else if(type.includes("Permanent")) {
+                return "Perm";
+              } else {
+                return type;
+              }
+            }
+
+            x0.domain(yearData.map(function(d) { return abbreviateVisaType(d.MajorGrouping); }));
             x1.domain(keys).rangeRound([0, x0.bandwidth()]);
-            y.domain([0, d3.max(yearData, function(d) { return d3.max(keys, function(key) { return d[key]; }); })]).nice();
-    
+            y.domain([d3.min(yearData, function(d) { return d3.min(keys, function(key) { return d[key]; }); }), d3.max(yearData, function(d) { return d3.max(keys, function(key) { return d[key]; }); })]).nice();
+
             svg.append("g")
-                .selectAll("g")
-                .data(yearData)
-                .enter().append("g")
-                .attr("transform", function(d) { return "translate(" + x0(d.VisaType) + ",0)"; })
-                .selectAll("rect")
-                .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
-                .enter().append("rect")
-                .attr("x", function(d) { return x1(d.key); })
-                .attr("y", function(d) { return y(d.value); })
-                .attr("width", x1.bandwidth())
-                .attr("height", function(d) { return height - y(d.value); })
-                .attr("fill", function(d) { return colors[keys.indexOf(d.key)]; });
-    
-            // Add the x-axis
-            svg.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(xAxis);
-    
-            // Add the y-axis
-            svg.append("g")
-                .attr("class", "y axis")
-                .call(yAxis)
+              .selectAll("g")
+              .data(yearData)
+              .enter().append("g")
+              .attr("transform", function(d) { return "translate(" + x0(abbreviateVisaType(d.MajorGrouping)) + ",0)"; })
+              .selectAll("rect")
+              .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
+              .enter().append("rect")
+              .attr("x", function(d) { return x1(d.key); })
+              .attr("y", function(d) { return y(d.value); })
+              .attr("width", x1.bandwidth())
+              .attr("height", function(d) { return height - y(d.value); })
+              .attr("fill", function(d) { return colors[keys.indexOf(d.key)]; });
+          
             
-          });
-        
+            var xAxis = d3.axisBottom(x0);
+            var yAxis = d3.axisLeft(y);
+    
+          // Add the x-axis
+          svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")") // Update the transform attribute
+            .call(xAxis);
+
+
+          svg.append("g")
+              .attr("class", "y axis")
+              .call(yAxis);
+                    
+            // Add legend for visa types
+            var legendVisaTypes = svg.append("g")
+              .attr("font-family", "sans-serif")
+              .attr("font-size", 10)
+              .attr("text-anchor", "end")
+              .selectAll("g")
+              .data(yearData.map(function(d) { return d.MajorGrouping; }))
+              .enter().append("g")
+              .attr("transform", function(d, i) { return "translate(" + (width + margin.right - 50) + "," + i * 20 + ")"; });
+
+            legendVisaTypes.append("text")
+              .attr("x", 24)
+              .attr("y", 9.5)
+              .attr("dy", "0.32em")
+              .text(function(d) { return d; });
+
+            // Add legend for bar colors
+            var legendBarColors = svg.append("g")
+              .attr("font-family", "sans-serif")
+              .attr("font-size", 10)
+              .attr("text-anchor", "end")
+              .selectAll("g")
+              .data(keys.slice())
+              .enter().append("g")
+              .attr("transform", function(d, i) { return "translate(" + (width + margin.right - 50) + "," + (i * 20 + yearData.length * 20) + ")"; });
+
+            legendBarColors.append("rect")
+              .attr("x", 5)
+              .attr("width", 19)
+              .attr("height", 19)
+              .attr("fill", color);
+
+            legendBarColors.append("text")
+              .attr("x", 24)
+              .attr("y", 9.5)
+              .attr("dy", "0.32em")
+              .text(function(d) { return d; });
+
+            svg.append("line")
+              .attr("x1", 0)
+              .attr("y1", y(0))
+              .attr("x2", width)
+              .attr("y2", y(0))
+              .style("stroke", "black")
+              .style("stroke-width", 2)
+              .style("stroke-dasharray", "3,3");
+        });
+
       }  
   
       //add y axis (1)
@@ -195,6 +264,7 @@ function initTempVsPermBarChart() {
         .attr("width", 18)
         .attr("height", 18)
         .style("fill", function(d) { return d.color; });
+        
       //legend labels 
       legend.append("text")
         .attr("x", width - 24)

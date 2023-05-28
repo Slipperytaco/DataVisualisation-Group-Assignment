@@ -79,3 +79,11 @@ body {
   text-align: center;
   margin-bottom: 20px;
 }
+
+.bar--positive {
+  fill: #6baed6;
+}
+
+.bar--negative {
+  fill: #fd8d3c;
+}
