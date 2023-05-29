@@ -87,3 +87,10 @@ body {
 .bar--negative {
   fill: #fd8d3c;
 }
+.x-axis-box {
+  fill: transparent;
+  stroke: #000;
+  stroke-width: 1px;
+  opacity: 0.5;
+  cursor: pointer;
+}

@@ -69,15 +69,15 @@ function initTempVsPermBarChart() {
   
       // Create the bars for temporary visas
       svg.selectAll(".bar-temporary")
-        .data(temporaryVisas)
-        .enter()
-        .append("rect")
-        .attr("class", "bar-temporary")
-        .attr("x", function(d) { return x(d.Year);})
-        .attr("y", function(d) { return y(d.Total); })
-        .attr("width", x.bandwidth() / 2)
-        .attr("height", function(d) { return height - y(d.Total); })
-        .style("fill", color("Temporary visas"));
+          .data(temporaryVisas)
+          .enter()
+          .append("rect")
+          .attr("class", "bar-temporary")
+          .attr("x", function(d) { return x(d.Year); })
+          .attr("y", function(d) { return y(Math.max(0, d.Total)); })
+          .attr("width", x.bandwidth() / 2)
+          .attr("height", function(d) { return Math.abs(y(d.Total) - y(0)); })
+          .style("fill", color("Temporary visas"));
   
       //Create the bars for perm visa
       svg.selectAll(".bar-permanent")
@@ -90,6 +90,7 @@ function initTempVsPermBarChart() {
         .attr("width", x.bandwidth() / 2)
         .attr("height", function(d) { return height - y(d.Total); })
         .style("fill", color("Permanent visas"));
+        
   
       //x-axis to chart
       svg.append("g")
@@ -98,6 +99,8 @@ function initTempVsPermBarChart() {
         .selectAll("text")
         .on("click", function(d) {
           displayYearDetails(d);
+      
+        
       });
 
       function displayYearDetails(year) {
@@ -111,7 +114,8 @@ function initTempVsPermBarChart() {
             d.NOMDeparture = +d.NOMDeparture;
             d.NOM = +d.NOM;
           });
-          console.log(data);
+
+          //console.log(data); - was used to diagnose data processing issues
 
           var colors = ["#6baed6", "#fd8d3c", "#74c476"];
           var color = d3.scaleOrdinal()
@@ -134,10 +138,10 @@ function initTempVsPermBarChart() {
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         
 
-            var x0 = d3.scaleBand()
+          var x0 = d3.scaleBand()
               .rangeRound([0, width])
               .paddingInner(0.1);
-            var x1 = d3.scaleBand()
+          var x1 = d3.scaleBand()
               .padding(0.05);
             var y = d3.scaleLinear()
               .rangeRound([height, 0]);
@@ -154,23 +158,58 @@ function initTempVsPermBarChart() {
                 return type;
               }
             }
+                    
+          // Calculate the minimum and maximum values in the data
+          var minValue = d3.min(data, function(d) {
+            return Math.min(d.NOMArrival, d.NOMDeparture, d.NOM);
+          });
+          var maxValue = d3.max(data, function(d) {
+            return Math.max(d.NOMArrival, d.NOMDeparture, d.NOM);
+          });
 
+          // Define the domain of the y scale based on the data
+          var yPositiveMax = d3.max(data, function(d) {
+            return Math.max(d.NOMArrival, d.NOMDeparture, d.NOM);
+          });
+          var yNegativeMin = d3.min(data, function(d) {
+            return Math.min(d.NOMArrival, d.NOMDeparture, d.NOM);
+          });
+        
+          // Create the y scales
+          var yPositive = d3.scaleLinear()
+            .domain([0, yPositiveMax])
+            .range([height, 0]);
+
+          var yNegative = d3.scaleLinear()
+            .domain([Math.abs(yNegativeMin), 0])
+            .range([height, height / 2]);
+                    
+          var y = d3.scaleLinear()
+            .range([height, 0])
+            .domain([maxValue, minValue]);
+          
+            
             x0.domain(yearData.map(function(d) { return abbreviateVisaType(d.MajorGrouping); }));
             x1.domain(keys).rangeRound([0, x0.bandwidth()]);
-            y.domain([d3.min(yearData, function(d) { return d3.min(keys, function(key) { return d[key]; }); }), d3.max(yearData, function(d) { return d3.max(keys, function(key) { return d[key]; }); })]).nice();
-
+            
             svg.append("g")
               .selectAll("g")
               .data(yearData)
-              .enter().append("g")
+              .enter()
+              .append("g")
               .attr("transform", function(d) { return "translate(" + x0(abbreviateVisaType(d.MajorGrouping)) + ",0)"; })
               .selectAll("rect")
-              .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
-              .enter().append("rect")
+              .data(function(d) { return keys.map(function(key) { return { key: key, value: d[key] }; }); })
+              .enter()
+              .append("rect")
               .attr("x", function(d) { return x1(d.key); })
-              .attr("y", function(d) { return y(d.value); })
+              .attr("y", function(d) { return d.value >= 0 ? yPositive(d.value) : yPositive(0); }) 
               .attr("width", x1.bandwidth())
-              .attr("height", function(d) { return height - y(d.value); })
+              .attr("height", function(d) { 
+                return d.value >= 0 
+                  ? yPositive(0) - yPositive(d.value) 
+                  : yNegative(0) - yNegative(d.value); 
+              })
               .attr("fill", function(d) { return colors[keys.indexOf(d.key)]; });
           
             
@@ -180,14 +219,24 @@ function initTempVsPermBarChart() {
           // Add the x-axis
           svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")") // Update the transform attribute
+            .attr("transform", "translate(0," + height + ")") 
             .call(xAxis);
-
-
+            
+          //y pos axis
           svg.append("g")
-              .attr("class", "y axis")
-              .call(yAxis);
-                    
+            .attr("class", "y axis")
+            .call(d3.axisLeft(yPositive)
+              .ticks(5)
+              .tickFormat(d3.format(".0s")));
+
+          // Add the y-axis for negative values
+          svg.append("g")
+            .attr("class", "y axis negative-axis")
+            .attr("transform", "translate(0," + height / 2 + ")")
+            .call(d3.axisLeft(yNegative)
+              .ticks(5)
+              .tickFormat(d3.format(".0s")));
+
             // Add legend for visa types
             var legendVisaTypes = svg.append("g")
               .attr("font-family", "sans-serif")
@@ -198,13 +247,6 @@ function initTempVsPermBarChart() {
               .enter().append("g")
               .attr("transform", function(d, i) { return "translate(" + (width + margin.right - 50) + "," + i * 20 + ")"; });
 
-            legendVisaTypes.append("text")
-              .attr("x", 24)
-              .attr("y", 9.5)
-              .attr("dy", "0.32em")
-              .text(function(d) { return d; });
-
-            // Add legend for bar colors
             var legendBarColors = svg.append("g")
               .attr("font-family", "sans-serif")
               .attr("font-size", 10)
@@ -226,14 +268,23 @@ function initTempVsPermBarChart() {
               .attr("dy", "0.32em")
               .text(function(d) { return d; });
 
+            // Add a horizontal line at y = 0
             svg.append("line")
               .attr("x1", 0)
-              .attr("y1", y(0))
+              .attr("y1", yPositive(0))
               .attr("x2", width)
-              .attr("y2", y(0))
-              .style("stroke", "black")
-              .style("stroke-width", 2)
-              .style("stroke-dasharray", "3,3");
+              .attr("y2", yPositive(0))
+              .attr("stroke", "black")
+              .attr("stroke-dasharray", "3,3")
+              .attr("stroke-width", 2);
+          //adds a title to the graph showing the year + details being displayed  
+            svg.append("text")
+              .attr("class", "graph-title")
+              .attr("x", (width + margin.left + margin.right) / 2)
+              .attr("y", -30)
+              .attr("text-anchor", "middle")
+              .text(year + " Details");
+            
         });
 
       }  
@@ -341,5 +392,4 @@ function initTempVsPermBarChart() {
         
     });
 }
-
 window.onload = initTempVsPermBarChart;

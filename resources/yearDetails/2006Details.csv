@@ -1,14 +1,12 @@
 ﻿VisaType,MajorGrouping,NOMArrival,NOMDeparture,NOM
-Temporary visas,,179670,64330,115340
-,,VET,13700,3330,10370
-,,Higher education sector,47970,15880,32090
-,,Student other,22850,6490,16370
-,,Temporary work skilled,31940,9000,22940
-,,Visitor,36750,14620,22130
-,,Working Holiday,19320,3380,15940
-,,Other temporary visas,7130,11640,-4500
-Permanent visas,,92520,15950,76570
-,,Family,31310,4390,26920
-,,Skill,45080,6800,38280
-,,S/E & humanitarian,12500,120,12380
-,,Other permanent visas,3620,4640,-1010
+Temporary visas,VET,13700,3330,10370
+Temporary visas,Education sector,47970,15880,32090
+Temporary visas,Student other,22850,6490,16370
+Temporary visas,Skilled work,31940,9000,22940
+Temporary visas,Visitor,36750,14620,22130
+Temporary visas,Working Holiday,19320,3380,15940
+Temporary visas,Misc Temp,7130,11640,-4500
+Permanent visas,Family,31310,4390,26920
+Permanent visas,Skill,45080,6800,38280
+Permanent visas,S/E & humanitarian,12500,120,12380
+Permanent visas,Misc Perm,3620,4640,-1010
