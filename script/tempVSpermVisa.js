@@ -26,7 +26,12 @@ function initTempVsPermBarChart() {
       var permanentVisas = data.filter(function(d) {
         return d.VisaType === "Permanent visas";
       });
-  
+
+      //tooltip for mouseover effects
+      var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
       // container Dimensions
       var margin = { top: 60, right: 100, bottom: 60, left: 60 };
       var width = 1000 - margin.left - margin.right;
@@ -77,7 +82,20 @@ function initTempVsPermBarChart() {
           .attr("y", function(d) { return y(Math.max(0, d.Total)); })
           .attr("width", x.bandwidth() / 2)
           .attr("height", function(d) { return Math.abs(y(d.Total) - y(0)); })
-          .style("fill", color("Temporary visas"));
+          .style("fill", color("Temporary visas"))
+          .on("mouseover", function(d) {
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+            tooltip.html("Year: " + d.Year + "<br/>" + "Total: " + d.Total)
+              .style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY - 28) + "px");
+          })
+          .on("mouseout", function(d) {
+            tooltip.transition()
+              .duration(500)
+              .style("opacity", 0)
+          });
   
       //Create the bars for perm visa
       svg.selectAll(".bar-permanent")
@@ -89,24 +107,41 @@ function initTempVsPermBarChart() {
         .attr("y", function(d) { return y(d.Total); })
         .attr("width", x.bandwidth() / 2)
         .attr("height", function(d) { return height - y(d.Total); })
-        .style("fill", color("Permanent visas"));
+        .style("fill", color("Permanent visas"))
+        .on("mouseover", function(d) {
+          tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+          tooltip.html("Year: " + d.Year + "<br/>" + "Total: " + d.Total)
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", 0)
+        });
         
-  
       //x-axis to chart
       svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x))
         .selectAll("text")
+        .style("cursor", "pointer") //css cursor - to indicate clickable text
         .on("click", function(d) {
-          displayYearDetails(d);
-      
-        
-      });
+          displayYearDetails(d);  //calls function that generates details 
+        });
 
+      //display details for a given year, by generating a new graph.
       function displayYearDetails(year) {
         d3.csv(`resources/yearDetails/${year}Details.csv`).then(function(data) {
-
           d3.select("#yearDetails").html("");
+          var yearData = data;  
+
+          //tool tip for mouseover effects 
+          var tooltip1 = d3.select("#yearDetails").append("div")
+            .attr("class", "tooltip1")
+            .style("opacity", 0);
 
           //covert string to numbers
           data.forEach(function(d) {
@@ -114,40 +149,36 @@ function initTempVsPermBarChart() {
             d.NOMDeparture = +d.NOMDeparture;
             d.NOM = +d.NOM;
           });
-
           //console.log(data); - was used to diagnose data processing issues
 
+          var keys = ["NOMArrival", "NOMDeparture", "NOM"]; //define bar groups and colours 
           var colors = ["#6baed6", "#fd8d3c", "#74c476"];
           var color = d3.scaleOrdinal()
             .domain(["NOMArrival", "NOMDeparture", "NOM"])
             .range(colors);
 
-          var yearData = data;  
-          
           //setup the svg for the new chart: 
           var margin = { top: 60, right: 100, bottom: 60, left: 60 };
           var width = 1000 - margin.left - margin.right;
           var height = 400 - margin.top - margin.bottom - margin.bottom;
 
           var svg = d3
-          .select("#yearDetails")
-          .append("svg")
-          .attr("width", width + margin.left + margin.right)
-          .attr("height", height + margin.top + margin.bottom + margin.bottom) 
-          .append("g")
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        
-
+            .select("#yearDetails")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom + margin.bottom) 
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
           var x0 = d3.scaleBand()
               .rangeRound([0, width])
               .paddingInner(0.1);
           var x1 = d3.scaleBand()
               .padding(0.05);
-            var y = d3.scaleLinear()
+          var y = d3.scaleLinear()
               .rangeRound([height, 0]);
-            
-            //define bar groups and colours 
-            var keys = ["NOMArrival", "NOMDeparture", "NOM"];
+          var scaleY = d3.scaleLinear()
+            .domain([Math.abs(minValue)])
 
             function abbreviateVisaType(type) {
               if(type.includes("Temporary")) {
@@ -157,8 +188,7 @@ function initTempVsPermBarChart() {
               } else {
                 return type;
               }
-            }
-                    
+            };     
           // Calculate the minimum and maximum values in the data
           var minValue = d3.min(data, function(d) {
             return Math.min(d.NOMArrival, d.NOMDeparture, d.NOM);
@@ -177,18 +207,18 @@ function initTempVsPermBarChart() {
         
           // Create the y scales
           var yPositive = d3.scaleLinear()
-            .domain([0, yPositiveMax])
+            .domain([0, maxValue * 1.05])
             .range([height, 0]);
 
           var yNegative = d3.scaleLinear()
-            .domain([Math.abs(yNegativeMin), 0])
+            .domain([Math.abs(yNegativeMin) * 1.05, 0])
+            //.domain([minValue, 0])
             .range([height, height / 2]);
                     
           var y = d3.scaleLinear()
             .range([height, 0])
             .domain([maxValue, minValue]);
-          
-            
+  
             x0.domain(yearData.map(function(d) { return abbreviateVisaType(d.MajorGrouping); }));
             x1.domain(keys).rangeRound([0, x0.bandwidth()]);
             
@@ -210,7 +240,20 @@ function initTempVsPermBarChart() {
                   ? yPositive(0) - yPositive(d.value) 
                   : yNegative(0) - yNegative(d.value); 
               })
-              .attr("fill", function(d) { return colors[keys.indexOf(d.key)]; });
+              .attr("fill", function(d) { return colors[keys.indexOf(d.key)]; })
+              .on("mouseover", function(d) {
+                tooltip1.transition()
+                  .duration(200)
+                  .style("opacity", .9);
+                tooltip1.html(d.key + ":" + "<br/>" + "Value: " + d.value )
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY - 28) + "px");
+              })
+              .on("mouseout", function(d) {
+                tooltip1.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+              });
           
             
             var xAxis = d3.axisBottom(x0);
@@ -226,16 +269,24 @@ function initTempVsPermBarChart() {
           svg.append("g")
             .attr("class", "y axis")
             .call(d3.axisLeft(yPositive)
-              .ticks(5)
+              //.ticks(8)
               .tickFormat(d3.format(".0s")));
 
           // Add the y-axis for negative values
+          /*
+          var ticks = yNegative.ticks(5)
+          ticks.pop();
+          ticks.push(0);
+          */
+          //var tickFormat = d3.format(".0f"); 
           svg.append("g")
             .attr("class", "y axis negative-axis")
             .attr("transform", "translate(0," + height / 2 + ")")
             .call(d3.axisLeft(yNegative)
-              .ticks(5)
-              .tickFormat(d3.format(".0s")));
+              .ticks(7)
+              //.tickValues(ticks)
+              .tickFormat(d3.format(".0f")));
+              //.tickFormat(function(d) { return tickFormat(Math.round(d)); })); 
 
             // Add legend for visa types
             var legendVisaTypes = svg.append("g")
@@ -286,16 +337,15 @@ function initTempVsPermBarChart() {
               .text(year + " Details");
             
         });
+      }  //end of displayYearDetails function 
 
-      }  
-  
       //add y axis (1)
       svg.append("g")
         .attr("transform", "translate(0,0)")
         .call(d3.axisLeft(y)
           .tickValues([...d3.ticks(0, maxValue, 8)]));
-         
-        //legend
+      
+      //legend
       var LegendData = [
         { label: "Temporary visas", color: color("Temporary visas") },
         { label: "Permanent visas", color: color("Permanent visas") },
@@ -307,8 +357,9 @@ function initTempVsPermBarChart() {
         .append("g")
         .attr("class", "legend")
         .attr("transform", function(d, i) {
-            return "translate(20," + i * 20 + ")";
+            return "translate(85," + i * 20 + ")";
         });
+
       //legend rectangles 
       legend.append("rect")
         .attr("x", width - 18)
@@ -332,10 +383,8 @@ function initTempVsPermBarChart() {
         .style("font-size", "18px")
         .text("Total Temporary Visa vs Permanent Visa Trends from 2004-2019 in Australia");
       
-      //TREND LINE / Moving avg implementation: 
-      //y scale:
+      //trend line appendage code
       var y2 = d3.scaleLinear().range([height, 0]).domain([0, maxValue]);
-
       //create line for trend lines:
       var line = d3.line().x(function(d) { return x(d.Year); }).y(function(d) { return y2(d.Average) });
 
@@ -343,6 +392,7 @@ function initTempVsPermBarChart() {
       var tempMovingAvgs = movingAverage(temporaryVisas, 2); //2 - window size, adjust if need
       var permMovingAvgs = movingAverage(permanentVisas, 2);
 
+      //appending trend lines to the graphs
       d3.select("#showTempTrend")
         .append("button")
         .text("Toggle Temporary Visa Trend Line")
@@ -358,13 +408,13 @@ function initTempVsPermBarChart() {
                     .attr("stroke-width", 2)
                     .attr("class", "line-temporary")
                     .attr("d", line);
-            }
+            }/*
             if (showTempTrendLine || showPermTrendLine) {
                 svg.append("g")
                     .attr("transform", "translate(" + width + ",0)")
                     .attr("class", "axis-right")
                     .call(d3.axisRight(y2));
-            }
+            }*/ //this commented out code adds a second y axis to the graph when the trend line is generated, removing as its not necessary
       });
       d3.select("#showPermTrend")
         .append("button")
@@ -381,13 +431,13 @@ function initTempVsPermBarChart() {
                     .attr("stroke-width", 2)
                     .attr("class", "line-permanent")
                     .attr("d", line);
-            }
+            }/*
             if (showTempTrendLine || showPermTrendLine) {
                 svg.append("g")
                     .attr("transform", "translate(" + width + ",0)")
                     .attr("class", "axis-right")
                     .call(d3.axisRight(y2));
-            };
+            }; */ //generates second y axis 
           });  
         
     });
