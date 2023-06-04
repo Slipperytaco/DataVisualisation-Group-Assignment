@@ -1,8 +1,8 @@
-// set the dimensions and margins of the graph
+//Dimensions of graph
 var width = 850;
 var height = 450;
 
-// append the svg object to the body of the page
+//appending the svg object to the body of the page
 var svg = d3.select("#vis")
   .append("svg")
     .attr("width", width)
