@@ -1,5 +1,4 @@
 // set the dimensions and margins of the graph
-var margin = {top: 50, right: 25, bottom: 50, left: 25};
 var width = 850;
 var height = 450;
 
@@ -50,7 +49,7 @@ d3.treemap()
   .padding(1)
   (treeData);
 
-// create a tooltip
+//Creating a tooltip
 var tooltip = d3.select("body")
   .append("div")
     .attr("class", "tooltip");
