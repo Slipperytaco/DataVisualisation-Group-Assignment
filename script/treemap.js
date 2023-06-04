@@ -83,7 +83,7 @@ svg.selectAll("rect")
     .attr('width', function(d){return d.x1 - d.x0;})
     .attr('height', function(d){return d.y1 - d.y0;})
     .style("stroke", "none")
-    .style("fill", "#0072BC")
+    .style("fill", "#C2452D")
   .on("mouseover", mouseover)
   .on("mouseleave", mouseleave);
 
